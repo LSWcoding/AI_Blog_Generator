@@ -1,0 +1,105 @@
+
+
+
+
+
+how to connect backend and frontend in django?
+create a folder 'templates' in the same layer of django project(with a manage.py inside)
+draw all the html files into \templates
+in settings.py enter 'DIRS': [BASE_DIR,'templates'], in TEMPLATES
+in views def index(request)
+	return render(request,'index.html')
+
+
+about urls:
+in the urls.py in blog_generator(created by developer for the projects):
+urlpatterns=[
+    path('', views.index, name="index"),#the url specified to the homepage
+    path('login', views.user_login, name="login"),
+    path('signup', views.user_signup, name="signup"),
+    path('logout', views.user_logout, name="logout")
+
+]
+
+in the urls.py in app(created by django):
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', include('blog_generator.urls'))#go into the blog_generator folder and look for urls
+
+how to run server?
+in the terminal:python manage.py runserver
+
+how to create admin?
+
+
+enter by \admin
+
+type in the terminal
+
+python manage.py createsuperuser
+
+
+The error no such table: auth_user occurs because you are trying to create a user before the database tables have been created. Django's user system requires specific tables to exist in your database (like auth_user) to store the superuser credentials.
+To fix this, you must apply the initial migrations to set up your database schema first. Run these two commands in order:
+1. Apply Migrations
+This command creates the necessary tables (including the missing auth_user table) in your SQLite database.
+powershell
+python manage.py migrate
+
+
+2. Create the Superuser
+Now that the tables exist, you can successfully create your admin account:
+powershell
+python manage.py createsuperuser
+
+
+
+
+the logic of sign up:
+
+<form action="POST">:to safely pass the info in the form to the backend
+
+in view.py:
+
+def signup(request):
+#receive the data from frontend
+if request.method == 'POST':
+username = request.POST['username'] 'username'is defined in the form in the frontend 
+
+how to create a user?
+in views.py: from django.contrib.auth.models import User
+user=User.object.create_user(username,password,email)#the features passed from request.POST
+user.save()
+#login as soon as signup completed and redirect to homepage
+from django.shortcuts import render,redirect
+login(request,user)
+return redirect('/')
+
+login logic:authenticate then login
+check out if the username match the password,using authentication
+from django.contrib.auth import authenticate
+user = authenticate(request, username=username,password=password)
+if user is not None:
+            login(request,user)
+            return redirect('/')
+
+how to logout?
+
+in views.py
+
+from django.contrib.auth import logout
+def user_logout(request):
+    logout(request)
+    return redirect('/')
+ 
+how to limit the users to login page when they do not login?
+
+in views.py
+
+from django.contrib.auth.decorators import login_required
+@login_required
+def index(request):
+    return render(request,'index.html')
+then in settings.py:
+
+type:LOGIN_URL = 'login' in the very bottom
